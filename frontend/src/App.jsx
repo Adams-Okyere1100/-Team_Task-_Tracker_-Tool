@@ -12,9 +12,11 @@ import {
   Layers3,
   LogOut,
   Plus,
+  Copy,
   Search,
   Sparkles,
   UsersRound,
+  UserPlus,
 } from 'lucide-react';
 import AuthScreen from './components/AuthScreen.jsx';
 import TaskCard from './components/TaskCard.jsx';
@@ -55,6 +57,8 @@ export default function App() {
   const [assigneeFilter, setAssigneeFilter] = useState('all');
   const [modalTask, setModalTask] = useState(undefined);
   const [logoutPending, setLogoutPending] = useState(false);
+  const [inviteUrl, setInviteUrl] = useState('');
+  const [invitePending, setInvitePending] = useState(false);
 
   useEffect(() => {
     apiRequest('/auth/me')
@@ -157,6 +161,41 @@ export default function App() {
     }
   }
 
+  async function createInvite() {
+    setInvitePending(true);
+    setPageError('');
+    try {
+      const { token } = await apiRequest('/invitations', {
+        method: 'POST',
+        body: JSON.stringify({}),
+      });
+      const inviteLink = new URL(window.location.href);
+      inviteLink.search = '';
+      inviteLink.hash = '';
+      inviteLink.searchParams.set('invite', token);
+      setInviteUrl(inviteLink.toString());
+      try {
+        await navigator.clipboard.writeText(inviteLink.toString());
+        setFeedback('Invitation link copied. It expires in 7 days.');
+      } catch {
+        setFeedback('Invitation link created. Copy it below to share.');
+      }
+    } catch (error) {
+      setPageError(error.message);
+    } finally {
+      setInvitePending(false);
+    }
+  }
+
+  async function copyInvite() {
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+      setFeedback('Invitation link copied.');
+    } catch (error) {
+      setPageError('Clipboard access is unavailable. Select the invitation link and copy it.');
+    }
+  }
+
   if (authLoading) {
     return <main className="loading-screen"><span className="loading-mark"><Layers3 size={23} /></span><span>Getting your workspace ready…</span></main>;
   }
@@ -172,7 +211,7 @@ export default function App() {
         </a>
         <div className="workspace-switcher">
           <span className="workspace-glyph">{initials(user.name).slice(0, 1)}</span>
-          <span className="workspace-name"><strong>Team workspace</strong><small>Shared space</small></span>
+          <span className="workspace-name"><strong>{user.workspaceName}</strong><small>{user.workspaceRole === 'owner' ? 'Owner workspace' : 'Team workspace'}</small></span>
           <ChevronDown aria-hidden="true" size={15} />
         </div>
         <div className="sidebar-section-label">WORKSPACE</div>
@@ -214,8 +253,18 @@ export default function App() {
               <h1>{activeView === 'team' ? 'Team board' : activeView === 'mine' ? 'Assigned to me' : 'Created by me'}<span className="heading-period">.</span></h1>
               <p className="page-subtitle">A clear view of the work, and who’s moving it forward.</p>
             </div>
-            <button className="button button-primary add-task-button" onClick={() => setModalTask(null)} type="button"><Plus size={18} />New task</button>
+            <div className="page-heading-actions">
+              {user.workspaceRole === 'owner' && <button className="button button-quiet invite-member-button" disabled={invitePending} onClick={createInvite} type="button"><UserPlus size={16} />{invitePending ? 'Creating link…' : 'Invite teammates'}</button>}
+              <button className="button button-primary add-task-button" onClick={() => setModalTask(null)} type="button"><Plus size={18} />New task</button>
+            </div>
           </section>
+
+          {inviteUrl && <section aria-label="Workspace invitation" className="invite-link-panel">
+            <span className="invite-link-copy"><strong>Invitation link</strong><small>Anyone with this link can join. It expires in 7 days.</small></span>
+            <input aria-label="Invitation link" onFocus={(event) => event.target.select()} readOnly value={inviteUrl} />
+            <button aria-label="Copy invitation link" className="task-icon-button" onClick={copyInvite} title="Copy invitation link" type="button"><Copy size={16} /></button>
+            <button aria-label="Dismiss invitation link" className="task-icon-button" onClick={() => setInviteUrl('')} title="Dismiss invitation link" type="button">×</button>
+          </section>}
 
           <section aria-label="Team summary" className="summary-strip">
             <div className="summary-item">

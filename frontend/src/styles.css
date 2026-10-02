@@ -36,7 +36,7 @@ button:disabled { cursor: not-allowed; opacity: .62; }
 .workspace-switcher { align-items: center; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.09); border-radius: 8px; display: flex; gap: 10px; margin-bottom: 31px; min-height: 56px; padding: 9px; }
 .workspace-glyph { align-items: center; background: #e79170; border-radius: 7px; color: #442a22; display: flex; font: 700 12px var(--serif); height: 32px; justify-content: center; width: 32px; }
 .workspace-name, .profile-info { display: flex; flex: 1; flex-direction: column; gap: 3px; min-width: 0; }
-.workspace-name strong { color: #f5f6ee; font-size: 12px; font-weight: 600; }
+.workspace-name strong { color: #f5f6ee; font-size: 12px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .workspace-name small { color: #9eb3a8; font-size: 10px; }
 .workspace-switcher > svg { color: #9eb3a8; }
 .sidebar-section-label { color: #89a295; font-size: 9px; font-weight: 700; letter-spacing: 1px; margin: 0 10px 10px; }
@@ -89,6 +89,13 @@ button:disabled { cursor: not-allowed; opacity: .62; }
 .add-task-button { box-shadow: 0 3px 9px rgba(24,58,48,.11); }
 .button-quiet { background: #f1f3ef; color: #526158; }
 .button-quiet:hover { background: #e7ebe5; }
+.page-heading-actions { align-items: center; display: flex; gap: 8px; }
+.invite-member-button { white-space: nowrap; }
+.invite-link-panel { align-items: center; background: #fff; border: 1px solid #e5eae2; border-radius: 6px; display: grid; gap: 10px; grid-template-columns: minmax(150px, .7fr) minmax(140px, 1fr) auto auto; margin: -10px 0 18px; padding: 9px 11px; }
+.invite-link-copy { display: grid; gap: 3px; min-width: 0; }
+.invite-link-copy strong { color: #405148; font-size: 10px; }
+.invite-link-copy small { color: #8a968e; font-size: 9px; }
+.invite-link-panel input { background: #f7f8f5; border: 1px solid #e8ece5; border-radius: 4px; color: #69786e; font-size: 9px; min-width: 0; padding: 8px; }
 
 .summary-strip { align-items: center; animation: arrive .42s .04s ease both; background: var(--paper); border: 1px solid #e9ece6; border-radius: 8px; display: grid; grid-template-columns: 1fr 1fr 1fr 1.05fr; margin-bottom: 27px; min-height: 83px; padding: 12px 16px; }
 .summary-item { align-items: center; border-right: 1px solid #edf0eb; display: flex; gap: 10px; min-height: 45px; padding: 0 14px 0 4px; }
@@ -226,6 +233,9 @@ button:disabled { cursor: not-allowed; opacity: .62; }
 .auth-form-wrap h2 { color: #273a30; font: 700 26px/1.3 var(--serif); letter-spacing: 0; margin: 0; }
 .auth-subtitle { color: #849088; font-size: 11px; margin: 8px 0 24px; }
 .auth-form { gap: 15px; }
+.auth-choice { background: #f0f3ed; border-radius: 5px; display: grid; gap: 3px; grid-template-columns: 1fr 1fr; padding: 3px; }
+.auth-choice button { background: transparent; border: 0; border-radius: 4px; color: #758279; cursor: pointer; font-size: 10px; min-height: 32px; padding: 0 7px; }
+.auth-choice .auth-choice-active { background: #fff; box-shadow: 0 1px 4px rgba(28,48,34,.09); color: #355540; font-weight: 700; }
 .auth-form .field-label { font-size: 10px; }
 .auth-form .field-label > input, .password-wrap input { min-height: 42px; }
 .password-wrap { display: block; position: relative; }
@@ -283,6 +293,9 @@ button:disabled { cursor: not-allowed; opacity: .62; }
 	.topbar-avatar { height: 27px; width: 27px; }
 	.page-content { padding: 23px 16px 20px; }
 	.page-heading { align-items: flex-start; gap: 12px; margin-bottom: 19px; }
+	.page-heading-actions { gap: 6px; }
+	.invite-member-button { font-size: 0; gap: 0; height: 36px; min-height: 36px; padding: 0; width: 38px; }
+	.invite-member-button svg { height: 17px; width: 17px; }
 	.page-heading h1 { font-size: 25px; }
 	.page-subtitle { font-size: 10px; line-height: 1.5; max-width: 255px; }
 	.page-heading .eyebrow { font-size: 8px; }
@@ -297,6 +310,9 @@ button:disabled { cursor: not-allowed; opacity: .62; }
 	.summary-copy strong { font-size: 15px; }
 	.summary-completion { font-size: 9px; gap: 7px; grid-template-columns: auto minmax(20px, 1fr) auto; margin-top: 7px; padding: 8px 5px 0; }
 	.board-toolbar { align-items: flex-start; flex-direction: column; gap: 10px; margin-bottom: 13px; }
+	.invite-link-panel { gap: 7px; grid-template-columns: minmax(0, 1fr) auto auto; margin-top: -7px; }
+	.invite-link-copy { grid-column: 1 / -1; }
+	.invite-link-panel input { grid-column: 1; }
 	.board-toolbar-title { font-size: 9px; }
 	.board-toolbar-title strong { font-size: 10px; }
 	.board-controls { gap: 6px; width: 100%; }

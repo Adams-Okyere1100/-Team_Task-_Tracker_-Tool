@@ -3,8 +3,12 @@ import { ArrowRight, Check, Eye, EyeOff, Layers3 } from 'lucide-react';
 import { apiRequest } from '../lib/api.js';
 
 export default function AuthScreen({ onAuthenticated }) {
-  const [mode, setMode] = useState('login');
+  const initialInviteToken = new URLSearchParams(window.location.search).get('invite') || '';
+  const [mode, setMode] = useState(initialInviteToken ? 'register' : 'login');
+  const [registrationMethod, setRegistrationMethod] = useState(initialInviteToken ? 'invite' : 'create');
   const [name, setName] = useState('');
+  const [workspaceName, setWorkspaceName] = useState('');
+  const [inviteToken, setInviteToken] = useState(initialInviteToken);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -17,11 +21,21 @@ export default function AuthScreen({ onAuthenticated }) {
     setError('');
     try {
       const endpoint = mode === 'login' ? '/auth/login' : '/auth/register';
-      const body = mode === 'login' ? { email, password } : { name, email, password };
+      const body = mode === 'login'
+        ? { email, password }
+        : {
+          name,
+          email,
+          password,
+          ...(registrationMethod === 'create' ? { workspaceName } : { inviteToken: inviteToken.trim() }),
+        };
       const { user } = await apiRequest(endpoint, {
         method: 'POST',
         body: JSON.stringify(body),
       });
+      const currentUrl = new URL(window.location.href);
+      currentUrl.searchParams.delete('invite');
+      window.history.replaceState({}, '', `${currentUrl.pathname}${currentUrl.search}${currentUrl.hash}`);
       onAuthenticated(user);
     } catch (requestError) {
       setError(requestError.message);
@@ -57,14 +71,31 @@ export default function AuthScreen({ onAuthenticated }) {
         <div className="auth-form-wrap">
           <p className="eyebrow">{mode === 'login' ? 'WELCOME BACK' : 'GET YOUR TEAM STARTED'}</p>
           <h2>{mode === 'login' ? 'Sign in to your workspace' : 'Create your account'}</h2>
-          <p className="auth-subtitle">{mode === 'login' ? 'Pick up where your team left off.' : 'Join the shared workspace and get moving.'}</p>
+          <p className="auth-subtitle">{mode === 'login' ? 'Pick up where your team left off.' : 'Create a private workspace or join your team by invitation.'}</p>
 
           <form className="auth-form" onSubmit={handleSubmit}>
             {mode === 'register' && (
-              <label className="field-label">
-                Your name
-                <input autoComplete="name" maxLength="60" minLength="2" onChange={(event) => setName(event.target.value)} placeholder="Jordan Lee" required value={name} />
-              </label>
+              <>
+                <div aria-label="Workspace setup" className="auth-choice" role="group">
+                  <button aria-pressed={registrationMethod === 'create'} className={registrationMethod === 'create' ? 'auth-choice-active' : ''} onClick={() => setRegistrationMethod('create')} type="button">Create workspace</button>
+                  <button aria-pressed={registrationMethod === 'invite'} className={registrationMethod === 'invite' ? 'auth-choice-active' : ''} onClick={() => setRegistrationMethod('invite')} type="button">Join with invite</button>
+                </div>
+                <label className="field-label">
+                  Your name
+                  <input autoComplete="name" maxLength="60" minLength="2" onChange={(event) => setName(event.target.value)} placeholder="Jordan Lee" required value={name} />
+                </label>
+                {registrationMethod === 'create' ? (
+                  <label className="field-label">
+                    Workspace name
+                    <input autoComplete="organization" maxLength="80" minLength="2" onChange={(event) => setWorkspaceName(event.target.value)} placeholder="Studio North" required value={workspaceName} />
+                  </label>
+                ) : (
+                  <label className="field-label">
+                    Invitation token
+                    <input autoCapitalize="none" autoComplete="off" onChange={(event) => setInviteToken(event.target.value)} placeholder="Paste your team invitation link token" required spellCheck="false" value={inviteToken} />
+                  </label>
+                )}
+              </>
             )}
             <label className="field-label">
               Work email
